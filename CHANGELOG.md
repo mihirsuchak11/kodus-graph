@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- A call outside every function was dropped from the graph: top-level
+  statements, callbacks passed at top level (`setTimeout(() => f())`,
+  `app.get('/', (req, res) => render(res))`), Python
+  `if __name__ == "__main__":` blocks, module- and package-level initializers
+  and class bodies, in every language. `context` then listed only the callers
+  inside functions. Such a call is now a CALLS edge whose source is the file
+  path, as IMPORTS edges already are.
 - `update` now produces the same graph as a fresh `parse`. It re-parsed only
   the changed files and kept every other edge, so callers of a renamed or
   deleted symbol kept pointing at nothing and a call to a newly defined

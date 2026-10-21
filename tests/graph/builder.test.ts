@@ -227,7 +227,7 @@ describe('buildGraphData', () => {
         expect(calls.find((e) => e.target_qualified === 'src/b.ts::other')?.source_qualified).toBe('src/a.ts::outer');
     });
 
-    it('should fallback to ::unknown for top-level calls outside any function', () => {
+    it('should credit top-level calls outside any function to the file', () => {
         const raw: RawGraph = {
             functions: [
                 {
@@ -274,8 +274,12 @@ describe('buildGraphData', () => {
         const result = buildGraphData(raw, callEdges, [], 'src', new Map());
         const callEdge = result.edges.find((e) => e.kind === 'CALLS');
 
-        // Top-level calls with no enclosing function are skipped (no ::unknown edges)
-        expect(callEdge).toBeUndefined();
+        // The caller is the file itself (no ::unknown edges, no dropped call)
+        expect(callEdge).toBeDefined();
+        expect(callEdge?.source_qualified).toBe('src/a.py');
+        expect(callEdge?.target_qualified).toBe('src/b.py::init');
+        expect(callEdge?.file_path).toBe('src/a.py');
+        expect(callEdge?.line).toBe(3);
     });
 
     it('should resolve method calls within class methods (Python-style)', () => {

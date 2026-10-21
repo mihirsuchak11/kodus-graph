@@ -229,10 +229,10 @@ export function buildGraphData(
                     }
                 }
             }
-            if (!resolved) {
-                continue; // Skip top-level calls with no enclosing function
-            }
-            sourceQualified = resolved;
+            // A call outside every function (top-level code, a callback passed at
+            // top level, a module-level initializer) is credited to its file, the
+            // same source IMPORTS edges use.
+            sourceQualified = resolved ?? sourceFile;
         }
 
         edges.push({
